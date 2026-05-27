@@ -1,0 +1,314 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    background:
+    radial-gradient(circle at top left, #3b0066, transparent 35%),
+    radial-gradient(circle at bottom right, #24003d, transparent 40%),
+    #050008;
+    font-family:'Poppins', sans-serif;
+    color:white;
+}
+
+/* Animated Stars */
+
+body::before{
+    content:'';
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-image:
+    radial-gradient(white 1px, transparent 1px);
+    background-size:50px 50px;
+    opacity:0.15;
+    animation:stars 40s linear infinite;
+}
+
+@keyframes stars{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(-100px);
+    }
+}
+
+/* Main Container */
+
+.container{
+    width:1000px;
+    height:600px;
+    background:rgba(10,0,20,0.85);
+    border:2px solid #7f2aff;
+    border-radius:30px;
+    backdrop-filter:blur(8px);
+    box-shadow:
+    0 0 20px #7f2aff,
+    0 0 50px rgba(127,42,255,0.5);
+    display:flex;
+    overflow:hidden;
+    position:relative;
+}
+
+/* Left Side */
+
+.left{
+    width:45%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:40px;
+    position:relative;
+}
+
+/* Cat Image */
+
+.left img{
+    width:350px;
+    filter:
+    drop-shadow(0 0 20px #b266ff);
+    animation:float 5s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%{
+        transform:translateY(0px);
+    }
+    50%{
+        transform:translateY(-15px);
+    }
+    100%{
+        transform:translateY(0px);
+    }
+}
+
+/* Right Side */
+
+.right{
+    width:55%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+}
+
+.login-box{
+    width:420px;
+    padding:40px;
+    border:2px solid rgba(180,100,255,0.3);
+    border-radius:25px;
+    background:rgba(0,0,0,0.35);
+    box-shadow:
+    0 0 20px rgba(127,42,255,0.4);
+}
+
+/* Title */
+
+.game-title{
+    text-align:center;
+    font-family:'Cinzel', serif;
+    font-size:64px;
+    margin-bottom:5px;
+    color:#e5c8ff;
+    text-shadow:
+    0 0 10px #c061ff,
+    0 0 25px #7f2aff;
+}
+
+.subtitle{
+    text-align:center;
+    margin-bottom:40px;
+    color:#d9b8ff;
+}
+
+/* Login Text */
+
+.login-title{
+    text-align:center;
+    font-family:'Cinzel', serif;
+    font-size:32px;
+    margin-bottom:10px;
+    color:#f1dcff;
+}
+
+.login-sub{
+    text-align:center;
+    margin-bottom:30px;
+    color:#c9a8ff;
+}
+
+/* Input Fields */
+
+.input-box{
+    margin-bottom:20px;
+}
+
+.input-box input{
+    width:100%;
+    padding:15px;
+    border:none;
+    outline:none;
+    border:2px solid #6b21d8;
+    background:#120018;
+    color:white;
+    border-radius:12px;
+    font-size:16px;
+    transition:0.3s;
+}
+
+.input-box input:focus{
+    box-shadow:
+    0 0 10px #a855f7,
+    0 0 20px #7f2aff;
+}
+
+/* Forgot Password */
+
+.forgot{
+    text-align:right;
+    margin-bottom:25px;
+}
+
+.forgot a{
+    color:#d8b4fe;
+    text-decoration:none;
+}
+
+.forgot a:hover{
+    color:white;
+}
+
+/* Buttons */
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    font-size:18px;
+    font-family:'Cinzel', serif;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+/* Login Button */
+
+.login-btn{
+    background:linear-gradient(45deg,#7f2aff,#b266ff);
+    color:white;
+    box-shadow:
+    0 0 15px rgba(178,102,255,0.5);
+}
+
+.login-btn:hover{
+    transform:scale(1.03);
+    box-shadow:
+    0 0 20px #c061ff,
+    0 0 35px #7f2aff;
+}
+
+/* Create Account */
+
+.create-btn{
+    margin-top:20px;
+    background:transparent;
+    border:2px solid #7f2aff;
+    color:#d8b4fe;
+}
+
+.create-btn:hover{
+    background:#7f2aff;
+    color:white;
+}
+
+/* Footer */
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+    color:#a78bfa;
+    font-size:14px;
+}
+
+/* ==========================================================================
+   POP-UP WINDOW MODAL INFRASTRUCTURE
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 1, 7, 0.85); /* Dims background login screen */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Toggled open via script controllers */
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background: linear-gradient(135deg, #120018, #050008);
+    border: 2px solid #7f2aff;
+    box-shadow: 0 0 25px rgba(127, 42, 255, 0.6);
+    padding: 35px;
+    border-radius: 25px;
+    width: 440px;
+    max-width: 95%;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-header-title {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    margin-bottom: 5px;
+    color: #e5c8ff;
+    text-shadow: 0 0 10px #c061ff;
+}
+
+.modal-text {
+    text-align: center;
+    color: #c9a8ff;
+    font-size: 13px;
+    margin-bottom: 25px;
+}
+
+.modal-cancel-link {
+    background: transparent;
+    border: none;
+    color: #a78bfa;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    text-decoration: underline;
+    width: auto;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.modal-cancel-link:hover {
+    color: white;
+}

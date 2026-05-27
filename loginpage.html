@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkmeowt Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=400;700&family=Poppins:wght=300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./loginstyle.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="left">
+        <img src="./cat.jpg" alt="Fantasy Cat">
+    </div>
+
+    <div class="right">
+        <div class="login-box">
+            <h1 class="login-title">CHECKMEOWT</h1>
+            <p class="login-sub">Log in to continue your journey.</p>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="input-box">
+                    <input type="text" id="login-username" placeholder="Username or Email" required>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn">LOG IN</button>
+            </form>
+
+            <button class="create-btn" onclick="openRegisterModal()">CREATE ACCOUNT</button>
+
+            <div class="footer">
+                ✦ Step into the shadows. Your legend awaits.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="register-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header-title">CREATE ACCOUNT</div>
+        <p class="modal-text">Register your credentials to forge your profile.</p>
+        
+        <form id="register-form" onsubmit="handleRegister(event)">
+            <div class="input-box">
+                <input type="text" id="reg-username" placeholder="Choose Username" required>
+            </div>
+            <div class="input-box">
+                <input type="email" id="reg-email" placeholder="Email Address" required>
+            </div>
+            <div class="input-box">
+                <input type="password" id="reg-password" placeholder="Password" required>
+            </div>
+            <div class="input-box">
+                <input type="password" id="reg-confirm" placeholder="Confirm Password" required>
+            </div>
+            <button type="submit" class="login-btn" style="margin-top: 10px;">REGISTER & SAVE</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 15px;">
+            <button class="modal-cancel-link" onclick="closeRegisterModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    // --- LINK YOUR CREDENTIALS HERE ---
+const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function openRegisterModal() {
+        document.getElementById("register-modal").classList.add("active");
+    }
+
+    function closeRegisterModal() {
+        document.getElementById("register-modal").classList.remove("active");
+        document.getElementById("register-form").reset();
+    }
+
+    // --- CLOUD REGISTRATION ENGINE ---
+    async function handleRegister(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("reg-username").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value;
+        const confirmPassword = document.getElementById("reg-confirm").value;
+
+        if (password !== confirmPassword) {
+            alert("Error: Passwords do not match!");
+            return;
+        }
+
+        // 1. Check if username or email exists in the Supabase cloud table
+        const { data: existingUsers, error: fetchError } = await _supabase
+            .from('checkmeowt_users')
+            .select('username, email');
+
+        if (fetchError) {
+            alert("Database Error: " + fetchError.message);
+            return;
+        }
+
+        const userExists = existingUsers.some(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
+        if (userExists) {
+            alert("Identity Conflict: This Username or Email is already taken!");
+            return;
+        }
+
+        // 2. Insert new user into your Supabase table
+        const { error: insertError } = await _supabase
+            .from('checkmeowt_users') // TYPO FIXED HERE (.from instead of ..from)
+            .insert([{ username, email, password }]);
+
+        if (insertError) {
+            alert("Registration Failed: " + insertError.message);
+        } else {
+            alert("Account successfully created and saved to the cloud database!");
+            
+            // AUTOMATIC LOGIN SYSTEM INTERACTION INJECTION
+            localStorage.setItem("currentUser", username);
+            
+            closeRegisterModal();
+            
+            // Move player to the main screen layout automatically
+            window.location.href = "./index.html";
+        }
+    }
+
+    // --- CLOUD LOGIN ENGINE ---
+    async function handleLogin(event) {
+        event.preventDefault();
+
+        const inputUser = document.getElementById("login-username").value.trim().toLowerCase();
+        const inputPass = document.getElementById("login-password").value;
+
+        // Fetch user from the cloud table matching the account data
+        const { data: users, error } = await _supabase
+            .from('checkmeowt_users')
+            .select('*');
+
+        if (error) {
+            alert("Database Connection Error: " + error.message);
+            return;
+        }
+
+        const validUser = users.find(user => 
+            (user.username.toLowerCase() === inputUser || user.email.toLowerCase() === inputUser) && 
+            user.password === inputPass
+        );
+
+        if (validUser) {
+            // Keep track of who is logged in locally during this game run
+            localStorage.setItem("currentUser", validUser.username);
+            window.location.href = "./index.html";
+        } else {
+            alert("Authentication Failure: Invalid credentials.");
+        }
+    }
+</script>
+
+</body>
+</html>

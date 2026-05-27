@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkmeowt - Grandmaster Realm</title>
+    <link rel="stylesheet" href="./expertstyle.css">
+</head>
+<body>
+    <div id="pause-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2>Game Paused</h2>
+            <p>Your timeline is frozen. What is your command, Knight?</p>
+            <div class="modal-actions">
+                <button class="modal-btn resume-btn" onclick="togglePause()">Resume Quest</button>
+                <button class="modal-btn menu-btn" onclick="goToMainMenu()">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameover-modal" class="modal-overlay gameover-theme">
+        <div class="modal-card gameover-card">
+            <h2>GAME OVER</h2>
+            <p>The dark void has consumed your path. Your journey ends here.</p>
+            <div class="modal-actions">
+                <button class="modal-btn retry-btn" onclick="resetGame()">Try Again</button>
+                <button class="modal-btn menu-btn" onclick="goToMainMenu()">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" class="container">
+        <h1>Codex of the Expert Knight's Tour</h1>
+        
+        <div class="split-screen-layout">
+            
+            <div class="left-panel">
+                
+                <div class="game-controls">
+                    <div class="stat-box">TIME:<br><span id="timer" style="color: #ff3344;">00:00</span></div>
+                    <div class="stat-box">TILES CLEARED:<br><span id="score" style="color: #ff3344;">0</span>/64</div>
+                </div>
+
+                <div class="codex-section">
+                    <h3>How to Play</h3>
+                    <ol>
+                        <li><strong>Summon:</strong> Click any tile on the grid to place your cat and begin.</li>
+                        <li><strong>Leap:</strong> Move in L-shapes. Calculate your jumps carefully!</li>
+                        <li><strong>No Turning Back:</strong> Undo commands and hint charms are strictly disabled.</li>
+                        <li><strong>Conquer:</strong> Visit every single square exactly once to win.</li>
+                        <li><strong>Restart:</strong> Use Restart to clear the void and try the trial fresh.</li>
+                    </ol>
+                </div>
+
+                <div class="action-panel">
+                    <button class="btn pause-btn-trigger" onclick="togglePause()">Pause</button>
+                    <button class="btn" id="reset-btn" onclick="resetGame()">Restart</button>
+                    <button class="btn main-menu-btn" onclick="goToMainMenu()">Main Menu</button>
+                </div>
+
+            </div>
+
+            <div class="right-panel">
+                <div class="board-wrapper">
+                    <div id="chess-board" class="board"></div>
+                </div>
+                <div id="status-msg">Click any tile to start your quest...</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // --- LINK YOUR CREDENTIALS HERE ---
+        const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const BOARD_SIZE = 8;
+        let boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(false));
+        let history = [];
+        let currentPos = null; 
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let gameActive = true;
+        let isPaused = false;
+
+        const containerElement = document.getElementById('game-container');
+        const boardElement = document.getElementById('chess-board');
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const statusElement = document.getElementById('status-msg');
+        const pauseModal = document.getElementById('pause-modal');
+        const gameoverModal = document.getElementById('gameover-modal');
+
+        function initBoard() {
+            boardElement.innerHTML = '';
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.classList.add((r + c) % 2 === 0 ? 'light' : 'dark');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.addEventListener('click', () => handleCellClick(r, c));
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(r, c) {
+            if (!gameActive || isPaused) return;
+
+            if (currentPos === null) {
+                startTimer();
+                executeMove(r, c);
+                return;
+            }
+
+            if (isValidLMove(currentPos.r, currentPos.c, r, c) && !boardState[r][c]) {
+                executeMove(r, c);
+            }
+        }
+
+        function executeMove(r, c) {
+            if (currentPos) {
+                const prevCell = getCellElement(currentPos.r, currentPos.c);
+                prevCell.classList.remove('current-pos');
+                prevCell.classList.add('visited');
+                prevCell.innerText = history.length + 1; 
+            }
+
+            boardState[r][c] = true;
+            currentPos = { r, c };
+            history.push({ r, c });
+
+            const newCell = getCellElement(r, c);
+            newCell.classList.add('current-pos');
+            newCell.innerText = '🐾';
+
+            scoreElement.innerText = history.length;
+            updateHighlights();
+            checkGameStates();
+        }
+
+        function isValidLMove(r1, c1, r2, c2) {
+            const rowDiff = Math.abs(r1 - r2);
+            const colDiff = Math.abs(c1 - c2);
+            return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+        }
+
+        function updateHighlights() {
+            document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target'));
+        }
+
+        function getValidMoves(r, c) {
+            const moves = [
+                {r: r-2, c: c-1}, {r: r-2, c: c+1},
+                {r: r-1, c: c-2}, {r: r-1, c: c+2},
+                {r: r+1, c: c-2}, {r: r+1, c: c+2},
+                {r: r+2, c: c-1}, {r: r+2, c: c+1}
+            ];
+            return moves.filter(m => m.r >= 0 && m.r < BOARD_SIZE && m.c >= 0 && m.c < BOARD_SIZE && !boardState[m.r][m.c]);
+        }
+
+        function togglePause() {
+            if (!gameActive && !isPaused) return;
+
+            isPaused = !isPaused;
+
+            if (isPaused) {
+                clearInterval(timerInterval);
+                pauseModal.classList.add('active');
+                statusElement.innerText = "Game Paused.";
+                statusElement.style.color = "#ebd16e";
+                document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target'));
+            } else {
+                pauseModal.classList.remove('active');
+                statusElement.innerText = "The path is clear. Keep jumping!";
+                statusElement.style.color = "#f6e6e8";
+                if (currentPos !== null) {
+                    resumeTimer();
+                    updateHighlights();
+                }
+            }
+        }
+
+        function goToMainMenu() {
+            window.location.href = "./index.html";
+        }
+
+        function checkGameStates() {
+            if (history.length === BOARD_SIZE * BOARD_SIZE) {
+                clearInterval(timerInterval);
+                statusElement.innerText = "Ascension Complete! You conquered the grid!";
+                statusElement.style.color = "#ff3344";
+                gameActive = false;
+                updateHighlights();
+                
+                // TRIGGER CLOUD STORAGE ON EXPERT PERFECT RUN
+                uploadGameScore("Expert", history.length, timerElement.innerText);
+                return;
+            }
+
+            if (getValidMoves(currentPos.r, currentPos.c).length === 0) {
+                clearInterval(timerInterval);
+                statusElement.innerText = "Void Alert: Trapped with no valid moves left!";
+                statusElement.style.color = "#ff3344";
+                gameActive = false;
+                updateHighlights();
+                
+                triggerDefeatSequence();
+
+                // TRIGGER CLOUD STORAGE ON EXPERT TRAPPED FAILURE
+                uploadGameScore("Expert", history.length, timerElement.innerText);
+            } else {
+                statusElement.innerText = "The path is clear. Keep jumping!";
+                statusElement.style.color = "#f6e6e8";
+            }
+        }
+
+        function triggerDefeatSequence() {
+            containerElement.classList.add('screen-shake');
+            setTimeout(() => {
+                containerElement.classList.remove('screen-shake');
+                gameoverModal.classList.add('active');
+            }, 600);
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            secondsElapsed = 0;
+            resumeTimer();
+        }
+
+        function resumeTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerElement.innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            timerElement.innerText = "00:00";
+            scoreElement.innerText = "0";
+            
+            statusElement.innerText = "Click any tile to start your quest...";
+            statusElement.style.color = "#ff3344";
+            boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(false));
+            history = [];
+            currentPos = null;
+            gameActive = true;
+            isPaused = false;
+            
+            pauseModal.classList.remove('active');
+            gameoverModal.classList.remove('active');
+            
+            initBoard();
+        }
+
+        function getCellElement(r, c) {
+            return document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+        }
+
+        // --- GLOBAL DATABASE INTERACTION INTERFACE ---
+        async function uploadGameScore(gameMode, tilesClearedCount, timeString) {
+            const activePlayer = localStorage.getItem("currentUser") || "Guest Player";
+            
+            const { data, error } = await _supabase
+                .from('scoreboard')
+                .insert([{ 
+                    username: activePlayer, 
+                    mode: gameMode, 
+                    tiles_cleared: tilesClearedCount, 
+                    time: timeString 
+                }]);
+
+            if (error) {
+                console.error("Database connection failure:", error.message);
+            } else {
+                console.log("Telemetry logs synchronized successfully with remote server clusters.");
+            }
+        }
+
+        initBoard();
+    </script>
+</body>
+</html>

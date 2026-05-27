@@ -1,0 +1,261 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:black;
+    overflow:hidden;
+    font-family:'Poppins', sans-serif;
+}
+
+/* Background Glow */
+body::before{
+    content:'';
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:
+    radial-gradient(circle at top left, rgba(128,0,255,0.35), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(180,0,255,0.3), transparent 40%);
+    z-index:-2;
+}
+
+/* Main Container */
+.menu-container{
+    width:1200px;
+    height:700px;
+    background:linear-gradient(135deg,#090010,#1a0029,#050008);
+    border:2px solid #8c2bff;
+    border-radius:25px;
+    box-shadow:
+    0 0 20px #7a00ff,
+    0 0 50px rgba(128,0,255,0.5);
+    display:flex;
+    overflow:hidden;
+    position:relative;
+}
+
+/* Decorative Border */
+.menu-container::before{
+    content:'';
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(180,100,255,0.3);
+    border-radius:18px;
+    pointer-events:none;
+}
+
+/* LEFT SIDE */
+.left-panel{
+    width:45%;
+    padding:60px;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+/* Title */
+.game-title{
+    font-family:'Cinzel', serif;
+    font-size:72px;
+    color:#d9b3ff;
+    text-shadow:
+    0 0 10px #c061ff,
+    0 0 25px #7a00ff;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#d4b5ff;
+    margin-bottom:50px;
+    line-height:1.5;
+}
+
+/* Menu Buttons */
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.menu button{
+    background:rgba(20,0,35,0.8);
+    border:2px solid #8c2bff;
+    color:white;
+    padding:18px;
+    font-size:20px;
+    border-radius:14px;
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    transition:0.3s;
+    letter-spacing:2px;
+    box-shadow:0 0 10px rgba(128,0,255,0.3);
+}
+
+.menu button:hover{
+    transform:translateX(10px);
+    background:#8c2bff;
+    box-shadow:
+    0 0 15px #c061ff,
+    0 0 30px #8c2bff;
+}
+
+/* RIGHT SIDE */
+.right-panel{
+    width:55%;
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Fantasy Card */
+.card{
+    width:420px;
+    height:560px;
+    border-radius:25px;
+    overflow:hidden;
+    position:relative;
+    border:3px solid #a855ff;
+    box-shadow:
+    0 0 25px #8c2bff,
+    0 0 50px rgba(168,85,255,0.6);
+}
+
+/* Character Image */
+.card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* Glow Overlay */
+.card::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        to top,
+        rgba(0,0,0,0.5),
+        rgba(128,0,255,0.15)
+    );
+}
+
+/* Floating Orbs */
+.orb{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(180,0,255,0.6);
+    filter:blur(10px);
+    animation:float 5s infinite ease-in-out;
+}
+
+.orb1{
+    width:80px;
+    height:80px;
+    top:10%;
+    right:12%;
+}
+
+.orb2{
+    width:60px;
+    height:60px;
+    bottom:12%;
+    left:55%;
+    animation-delay:2s;
+}
+
+@keyframes float{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-20px);}
+    100%{transform:translateY(0px);}
+}
+
+/* --- POPUP MODAL STYLING --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(3, 1, 7, 0.85); /* Dims the background menu */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Class added via JS to show popup smoothly */
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background: linear-gradient(135deg, #1c0f38, #0d061a);
+    border: 2px solid #6c3bf5;
+    box-shadow: 0 0 25px rgba(108, 59, 245, 0.5);
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(163, 112, 255, 0.6);
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-title i {
+    color: #ebd16e; /* Warning color tint */
+}
+
+.modal-text {
+    color: #cbbfe3;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.modal-close-btn {
+    background-color: #6c3bf5;
+    color: #ffffff;
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px rgba(108, 59, 245, 0.3);
+}
+
+.modal-close-btn:hover {
+    background-color: #8257ff;
+    box-shadow: 0 0 15px rgba(130, 87, 255, 0.6);
+}

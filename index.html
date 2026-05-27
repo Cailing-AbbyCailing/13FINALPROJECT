@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkmeowt Fantasy Menu</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=400;700&family=Poppins:wght=300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./indexstyle.css">
+</head>
+
+<body>
+
+<div class="menu-container">
+
+    <div class="left-panel">
+
+        <h1 class="game-title">CHECKMEOWT</h1>
+
+        <p class="subtitle">
+            Do you have the paws and brains
+            to master the board?
+        </p>
+
+        <div class="menu">
+            <button onclick="openNewGame()">NEW GAME</button>
+
+            <div id="new-game-modal" class="modal-overlay">
+                <div class="modal-card" style="width: 460px; padding: 25px 30px;">
+                    <div class="modal-title" style="text-align: center; display: block; margin-bottom: 20px;">
+                        Select Game Mode
+                    </div>
+                    
+                    <div class="modal-text" style="display: flex; flex-direction: column; gap: 12px; text-align: left; max-height: 380px; overflow-y: auto; padding-right: 5px;">
+                        
+                        <a href="novice.html" style="display: block; background-color: #6c3bf5; color: #ffffff; font-family: 'Cinzel', serif; text-decoration: none; padding: 12px 16px; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#8257ff'" onmouseout="this.style.backgroundColor='#6c3bf5'">
+                            <div style="font-weight: 700; letter-spacing: 1px; font-size: 15px;">NOVICE</div>
+                            <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #e1d9ff; font-weight: 300; margin-top: 2px; text-transform: none;">Valid moves highlighted, undo allowed, 5 hints</div>
+                        </a>
+
+                        <a href="competitor.html" style="display: block; background-color: transparent; color: #baadde; border: 1px solid rgba(186, 173, 222, 0.3); font-family: 'Cinzel', serif; text-decoration: none; padding: 12px 16px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='rgba(186, 173, 222, 0.08)'; this.style.borderColor='#baadde'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='rgba(186, 173, 222, 0.3)'; this.style.color='#baadde'">
+                            <div style="font-weight: 700; letter-spacing: 1px; font-size: 15px;">COMPETITOR</div>
+                            <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #a296c4; font-weight: 300; margin-top: 2px; text-transform: none;">Valid moves highlighted, undo allowed, 4 hints</div>
+                        </a>
+
+                        <a href="expert.html" style="display: block; background-color: transparent; color: #baadde; border: 1px solid rgba(186, 173, 222, 0.3); font-family: 'Cinzel', serif; text-decoration: none; padding: 12px 16px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='rgba(186, 173, 222, 0.08)'; this.style.borderColor='#baadde'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='rgba(186, 173, 222, 0.3)'; this.style.color='#baadde'">
+                            <div style="font-weight: 700; letter-spacing: 1px; font-size: 15px;">EXPERT</div>
+                            <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #a296c4; font-weight: 300; margin-top: 2px; text-transform: none;">Valid moves highlighted, 10 undo allowed, no hints</div>
+                        </a>
+
+                        <a href="grandmaster.html" style="display: block; background-color: transparent; color: #baadde; border: 1px solid rgba(186, 173, 222, 0.3); font-family: 'Cinzel', serif; text-decoration: none; padding: 12px 16px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='rgba(235, 209, 110, 0.08)'; this.style.borderColor='#ebd16e'; this.style.color='#ebd16e'" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='rgba(186, 173, 222, 0.3)'; this.style.color='#baadde'">
+                            <div style="font-weight: 700; letter-spacing: 1px; font-size: 15px;">GRANDMASTER</div>
+                            <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #a296c4; font-weight: 300; margin-top: 2px; text-transform: none;">Valid moves not highlighted, undo not allowed, no hints</div>
+                        </a>
+
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="modal-close-btn" onclick="closeNewGame()" style="background-color: transparent; border: none; color: #726891; font-size: 13px; cursor: pointer; text-decoration: underline;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="checkSaveGame()">CONTINUE</button>
+
+            <div id="no-save-modal" class="modal-overlay">
+                <div class="modal-card">
+                    <div class="modal-title">
+                        No Saved Game
+                    </div>
+                    <p class="modal-text">You don't have any progress saved yet. Please start a new game first!</p>
+                    <button class="modal-close-btn" onclick="closeModal()">OK</button>
+                </div>
+            </div>
+
+            <button onclick="openScoreboard()">HISTORY</button>
+
+            <div id="scoreboard-modal" class="modal-overlay">
+                <div class="modal-card" style="width: 480px; padding: 25px 30px;">
+                    <div class="modal-title" style="text-align: center; display: block; margin-bottom: 20px;">
+                        Scoreboard History
+                    </div>
+                    <div class="modal-text" style="max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Poppins', sans-serif; font-size: 13px; color: #cbbfe3;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #6c3bf5; font-family: 'Cinzel', serif; color: #ffffff;">
+                                    <th style="padding: 8px;">Mode</th>
+                                    <th style="padding: 8px; text-align: center;">Tiles Cleared</th>
+                                    <th style="padding: 8px; text-align: right;">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scoreboard-rows">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="modal-close-btn" onclick="closeScoreboard()">Close</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="openRules()">RULES</button>
+
+            <div id="rules-modal" class="modal-overlay">
+                <div class="modal-card" style="text-align: left; width: 460px;">
+                    <div class="modal-title" style="text-align: center; display: block; margin-bottom: 20px;">
+                        How to Play
+                    </div>
+                    <div class="modal-text" style="font-size: 13px; line-height: 1.6;">
+                        <p style="margin-bottom: 12px;"><strong style="color: #baadde;">The L-Leap:</strong> You can only move in an "L-shape" (2 squares one way, 1 square perpendicular). You can leap over obstacles!</p>
+                        <p style="margin-bottom: 12px;"><strong style="color: #baadde;">The Void:</strong> Once you step off a tile, it collapses. You can never land on the same tile twice.</p>
+                        <p style="margin-bottom: 12px;"><strong style="color: #baadde;">The Goal:</strong> Visit every single tile on the grid exactly once to clear the board.</p>
+                        <p style="margin-bottom: 20px;"><strong style="color: #baadde;">Game Over:</strong> If you get trapped with no legal "L-moves" left before the board is cleared, you are lost to the void.</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="modal-close-btn" onclick="closeRules()">Got it</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="exitGame()">EXIT</button>
+        </div>
+
+    </div>
+
+    <div class="right-panel">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="card">
+            <img src="cat.jpg" alt="Fantasy Cat">
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="localstorage.js"></script>
+
+<script>
+    // --- LINK YOUR CREDENTIALS HERE ---
+    const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iVIA"; 
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function openRules() {
+        document.getElementById("rules-modal").classList.add("active");
+    }
+
+    function closeRules() {
+        document.getElementById("rules-modal").classList.remove("active");
+    }
+
+    function openNewGame() {
+        document.getElementById("new-game-modal").classList.add("active");
+    }
+
+    function closeNewGame() {
+        document.getElementById("new-game-modal").classList.remove("active");
+    }
+
+    // --- DOWNLOAD SCORES DYNAMICALLY FROM SUPABASE ---
+    async function openScoreboard() {
+        document.getElementById("scoreboard-modal").classList.add("active");
+        
+        const tableBody = document.getElementById("scoreboard-rows");
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; color:#a296c4;">Fetching cloud data...</td></tr>`;
+
+        // Fetch records sorted by highest tiles cleared first
+        const { data: scores, error } = await _supabase
+            .from('scoreboard')
+            .select('*')
+            .order('tiles_cleared', { ascending: false });
+
+        if (error) {
+            console.error(error);
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; padding:15px;">Failed to load cloud scores.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = ""; // Clear loader text
+
+        if (scores.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; color:#726891;">No historic records found.</td></tr>`;
+            return;
+        }
+
+        scores.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid rgba(108, 59, 245, 0.2)";
+            tr.innerHTML = `
+                <td style="padding: 10px 8px; font-weight: 600; color: #d9b3ff;">${row.mode} <span style="font-size:11px; color:#8c7db3;">(${row.username})</span></td>
+                <td style="padding: 10px 8px; text-align: center;">${row.tiles_cleared}</td>
+                <td style="padding: 10px 8px; text-align: right;">${row.time}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function closeScoreboard() {
+        document.getElementById("scoreboard-modal").classList.remove("active");
+    }
+
+    // --- SAFETY-OPTIMIZED EXIT SYSTEM CONTROLLER ---
+    function exitGame() {
+        try {
+            localStorage.removeItem("currentUser");
+        } catch(e) {
+            console.log("LocalStorage tracking bypass.");
+        }
+        
+        // Clear routing back to login workspace page
+        window.location.href = "./loginpage.html";
+    }
+</script>
+
+</body>
+</html>
