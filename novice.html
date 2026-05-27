@@ -43,7 +43,7 @@
                 <div class="codex-section">
                     <h3>How to Play</h3>
                     <ol>
-                        <li><strong>Summon:</strong> Click any tile to place your cat.</li>
+                        <li><strong>Summon:</strong> Click any tile to place your paw.</li>
                         <li><strong>Leap:</strong> Click glowing tiles to move in L-shapes.</li>
                         <li><strong>Conquer:</strong> Visit every square once to win.</li>
                         <li><strong>Undo:</strong> Revert moves infinitely.</li>
@@ -74,8 +74,8 @@
     <script>
         // --- LINK YOUR CREDENTIALS HERE ---
         const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtanRsdnRvbG1ianVteWZmbHMiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3OTgyMDU0OSwiZXhwIjoyMDk1Mzk2NTQ5fQ.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik"; 
+        let _supabase = null;
 
         const BOARD_SIZE = 8;
         let boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(false));

@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkmeowt - Expert Realm</title>
     <link rel="stylesheet" href="./expertstyle.css">
+    <style>
+        .modal-overlay {
+            display: none !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active {
+            display: flex !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -40,21 +58,23 @@
                 <div class="game-controls">
                     <div class="stat-box">TIME:<br><span id="timer" style="color: #ff3344;">00:00</span></div>
                     <div class="stat-box">TILES CLEARED:<br><span id="score" style="color: #ff3344;">0</span>/64</div>
+                    <div class="stat-box">UNDOS LEFT:<br><span id="undo-counter" style="color: #ff3344;">10</span>/10</div>
                 </div>
 
-                <div class="codex-section">
+                  <div class="codex-section">
                     <h3>How to Play</h3>
                     <ol>
-                        <li><strong>Summon:</strong> Click any tile on the grid to place your cat and begin.</li>
-                        <li><strong>Leap:</strong> Move in L-shapes. Calculate your jumps carefully!</li>
-                        <li><strong>No Turning Back:</strong> Undo commands and hint charms are strictly disabled.</li>
-                        <li><strong>Conquer:</strong> Visit every single square exactly once to win.</li>
-                        <li><strong>Restart:</strong> Use Restart to clear the void and try the trial fresh.</li>
+                        <li><strong>Summon:</strong> Click any tile to place your paw.</li>
+                        <li><strong>Leap:</strong> Click glowing tiles to move in L-shapes.</li>
+                        <li><strong>Conquer:</strong> Visit every square once to win.</li>
+                        <li><strong>Undo:</strong> Revert moves infinitely.</li>
+                        <li><strong>Insight:</strong> Use Hint charms for guidance.</li>
                     </ol>
                 </div>
 
                 <div class="action-panel">
                     <button class="btn pause-btn-trigger" onclick="togglePause()">Pause</button>
+                    <button class="btn" id="undo-btn" onclick="executeUndo()">Undo</button>
                     <button class="btn" id="reset-btn" onclick="resetGame()">Restart</button>
                     <button class="btn main-menu-btn" onclick="goToMainMenu()">Main Menu</button>
                 </div>
@@ -74,9 +94,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- LINK YOUR CREDENTIALS HERE ---
-        const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
+        const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const BOARD_SIZE = 8;
@@ -87,11 +106,13 @@
         let secondsElapsed = 0;
         let gameActive = true;
         let isPaused = false;
+        let undosRemaining = 10;
 
         const containerElement = document.getElementById('game-container');
         const boardElement = document.getElementById('chess-board');
         const scoreElement = document.getElementById('score');
         const timerElement = document.getElementById('timer');
+        const undoCounterElement = document.getElementById('undo-counter');
         const statusElement = document.getElementById('status-msg');
         const pauseModal = document.getElementById('pause-modal');
         const gameoverModal = document.getElementById('gameover-modal');
@@ -130,7 +151,7 @@
                 const prevCell = getCellElement(currentPos.r, currentPos.c);
                 prevCell.classList.remove('current-pos');
                 prevCell.classList.add('visited');
-                prevCell.innerText = history.length + 1; 
+                prevCell.innerText = history.length; 
             }
 
             boardState[r][c] = true;
@@ -146,15 +167,62 @@
             checkGameStates();
         }
 
+        function executeUndo() {
+            if (!gameActive || isPaused || history.length <= 1) {
+                if (history.length === 1) {
+                    statusElement.innerText = "Cannot undo initial starting placement position!";
+                }
+                return;
+            }
+
+            if (undosRemaining <= 0) {
+                statusElement.innerText = "No undo charms remaining for this trial!";
+                statusElement.style.color = "#ff3344";
+                return;
+            }
+
+            // Pop current position out of existence
+            const undonePos = history.pop();
+            boardState[undonePos.r][undonePos.c] = false;
+            const undoneCell = getCellElement(undonePos.r, undonePos.c);
+            undoneCell.classList.remove('current-pos');
+            undoneCell.innerText = '';
+
+            // Roll backward step references
+            currentPos = history[history.length - 1];
+            const activeCell = getCellElement(currentPos.r, currentPos.c);
+            activeCell.classList.remove('visited');
+            activeCell.classList.add('current-pos');
+            activeCell.innerText = '🐾';
+
+            undosRemaining--;
+            undoCounterElement.innerText = undosRemaining;
+            scoreElement.innerText = history.length;
+            
+            statusElement.innerText = "Time re-aligned. Step reversed safely.";
+            statusElement.style.color = "#ebd16e";
+            
+            updateHighlights();
+        }
+
         function isValidLMove(r1, c1, r2, c2) {
             const rowDiff = Math.abs(r1 - r2);
             const colDiff = Math.abs(c1 - c2);
             return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
         }
 
-        // VISUAL HIGHLIGHT INJECTIONS REMOVED FOR EXPERT PLAY
         function updateHighlights() {
+            // First wipe all legacy layouts cleanly
             document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target'));
+            
+            if (!gameActive || isPaused || currentPos === null) return;
+
+            // Highlight new projection coordinates onto the arena tiles
+            const targets = getValidMoves(currentPos.r, currentPos.c);
+            targets.forEach(m => {
+                const targetCell = getCellElement(m.r, m.c);
+                if (targetCell) targetCell.classList.add('valid-target');
+            });
         }
 
         function getValidMoves(r, c) {
@@ -191,7 +259,6 @@
 
         function goToMainMenu() {
             window.location.href = "./mainmenu.html";
-
         }
 
         function checkGameStates() {
@@ -201,7 +268,6 @@
                 statusElement.style.color = "#ff3344";
                 gameActive = false;
                 updateHighlights();
-                // AUTOMATICALLY UPLOAD EXPERT WIN
                 uploadGameScore("Expert", history.length, timerElement.innerText);
                 return;
             }
@@ -213,7 +279,6 @@
                 gameActive = false;
                 updateHighlights();
                 triggerDefeatSequence();
-                // AUTOMATICALLY UPLOAD EXPERT SCORE ON DEFEAT
                 uploadGameScore("Expert", history.length, timerElement.innerText);
             } else {
                 statusElement.innerText = "The path is clear. Keep jumping!";
@@ -248,6 +313,8 @@
             clearInterval(timerInterval);
             timerElement.innerText = "00:00";
             scoreElement.innerText = "0";
+            undosRemaining = 10;
+            undoCounterElement.innerText = "10";
             
             statusElement.innerText = "Click any tile to start your quest...";
             statusElement.style.color = "#ff3344";
@@ -267,7 +334,6 @@
             return document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
         }
 
-        // --- CLOUD DATABASE RECORDING CONTROLLER ---
         async function uploadGameScore(gameMode, tilesClearedCount, timeString) {
             const activePlayer = localStorage.getItem("currentUser") || "Guest Player";
             

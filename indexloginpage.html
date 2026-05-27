@@ -68,10 +68,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-    // --- LINK YOUR CREDENTIALS HERE ---
-const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Define the configuration explicitly
+    const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
+    
+    // CRITICAL: Ensure this is your actual long 'anon' 'public' key starting with eyJ...
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik"; 
+
+    // Explicitly use window.supabase to guarantee the library is targeted correctly
+    if (typeof window.supabase === 'undefined') {
+        alert("Critical Error: Supabase CDN failed to load. Check your internet connection.");
+    }
+
+    const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     function openRegisterModal() {
         document.getElementById("register-modal").classList.add("active");
@@ -84,7 +92,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
 
     // --- CLOUD REGISTRATION ENGINE ---
     async function handleRegister(event) {
-        event.preventDefault();
+        event.preventDefault(); // Stop form submission page-reload
 
         const username = document.getElementById("reg-username").value.trim();
         const email = document.getElementById("reg-email").value.trim();
@@ -96,39 +104,42 @@ const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
             return;
         }
 
-        // 1. Check if username or email exists in the Supabase cloud table
-        const { data: existingUsers, error: fetchError } = await _supabase
-            .from('checkmeowt_users')
-            .select('username, email');
+        try {
+            // Fetch users cleanly without complex query filtering that breaks local strings
+            const { data: existingUsers, error: fetchError } = await _supabase
+                .from('checkmeowt_users')
+                .select('*');
 
-        if (fetchError) {
-            alert("Database Error: " + fetchError.message);
-            return;
-        }
+            if (fetchError) {
+                alert("Database Read Error: " + fetchError.message);
+                return;
+            }
 
-        const userExists = existingUsers.some(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
-        if (userExists) {
-            alert("Identity Conflict: This Username or Email is already taken!");
-            return;
-        }
+            const userExists = existingUsers && existingUsers.some(u => 
+                (u.username && u.username.toLowerCase() === username.toLowerCase()) || 
+                (u.email && u.email.toLowerCase() === email.toLowerCase())
+            );
 
-        // 2. Insert new user into your Supabase table
-        const { error: insertError } = await _supabase
-            .from('checkmeowt_users') // TYPO FIXED HERE (.from instead of ..from)
-            .insert([{ username, email, password }]);
+            if (userExists) {
+                alert("Identity Conflict: This Username or Email is already taken!");
+                return;
+            }
 
-        if (insertError) {
-            alert("Registration Failed: " + insertError.message);
-        } else {
-            alert("Account successfully created and saved to the cloud database!");
-            
-            // AUTOMATIC LOGIN SYSTEM INTERACTION INJECTION
-            localStorage.setItem("currentUser", username);
-            
-            closeRegisterModal();
-            
-            // Move player to the main screen layout automatically
-            window.location.href = "./mainmenu.html";
+            // Insert new account record
+            const { error: insertError } = await _supabase
+                .from('checkmeowt_users')
+                .insert([{ username: username, email: email, password: password }]);
+
+            if (insertError) {
+                alert("Registration Failed: " + insertError.message);
+            } else {
+                alert("Account successfully created and saved to the cloud database!");
+                localStorage.setItem("currentUser", username);
+                closeRegisterModal();
+                window.location.href = "./mainmenu.html";
+            }
+        } catch (err) {
+            alert("Unexpected Runtime Error: " + err.message);
         }
     }
 
@@ -139,27 +150,30 @@ const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
         const inputUser = document.getElementById("login-username").value.trim().toLowerCase();
         const inputPass = document.getElementById("login-password").value;
 
-        // Fetch user from the cloud table matching the account data
-        const { data: users, error } = await _supabase
-            .from('checkmeowt_users')
-            .select('*');
+        try {
+            const { data: users, error } = await _supabase
+                .from('checkmeowt_users')
+                .select('*');
 
-        if (error) {
-            alert("Database Connection Error: " + error.message);
-            return;
-        }
+            if (error) {
+                alert("Database Connection Error: " + error.message);
+                return;
+            }
 
-        const validUser = users.find(user => 
-            (user.username.toLowerCase() === inputUser || user.email.toLowerCase() === inputUser) && 
-            user.password === inputPass
-        );
+            const validUser = users && users.find(user => 
+                ((user.username && user.username.toLowerCase() === inputUser) || 
+                 (user.email && user.email.toLowerCase() === inputUser)) && 
+                user.password === inputPass
+            );
 
-        if (validUser) {
-            // Keep track of who is logged in locally during this game run
-            localStorage.setItem("currentUser", validUser.username);
-            window.location.href = "./mainmenu.html";
-        } else {
-            alert("Authentication Failure: Invalid credentials.");
+            if (validUser) {
+                localStorage.setItem("currentUser", validUser.username);
+                window.location.href = "./mainmenu.html";
+            } else {
+                alert("Authentication Failure: Invalid credentials.");
+            }
+        } catch (err) {
+            alert("Login Runtime Error: " + err.message);
         }
     }
 </script>

@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkmeowt - Competitor Realm</title>
     <link rel="stylesheet" href="./gamemode.css">
+    <style>
+        .modal-overlay {
+            display: none !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active {
+            display: flex !important;
+        }
+
+        /* Temporary visual fallback class for hint cells if not styled in gamemode.css */
+        .cell.hint-target {
+            background-color: rgba(255, 215, 0, 0.6) !important;
+            animation: pulse-hint 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse-hint {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
 </head>
 <body>
     
@@ -40,23 +69,25 @@
                 <div class="game-controls">
                     <div class="stat-box">TIME:<br><span id="timer" style="color: #00ffc8;">00:00</span></div>
                     <div class="stat-box">TILES CLEARED:<br><span id="score" style="color: #ba55d3;">0</span>/64</div>
-                    <div class="stat-box">UNDOS LEFT:<br><span id="undo-counter" style="color: #ebd16e;">5</span></div>
+                    <div class="stat-box">UNDOS LEFT:<br><span id="undo-counter" style="color: #ebd16e;">20</span>/20</div>
+                    <div class="stat-box">HINTS LEFT:<br><span id="hint-counter" style="color: #00ffc8;">10</span>/10</div>
                 </div>
-
-                <div class="codex-section">
+                
+                 <div class="codex-section">
                     <h3>How to Play</h3>
                     <ol>
-                        <li><strong>Summon:</strong> Click any tile on the grid to place your cat and begin.</li>
-                        <li><strong>Leap:</strong> Click glowing, highlighted tiles to move in L-shapes.</li>
-                        <li><strong>Conquer:</strong> Visit every single square exactly once to win.</li>
-                        <li><strong>Rewind:</strong> Use the Undo button to reverse your last leap (Max 5 times).</li>
-                        <li><strong>Restart:</strong> Use Restart to start fresh on your current quest.</li>
+                        <li><strong>Summon:</strong> Click any tile to place your paw.</li>
+                        <li><strong>Leap:</strong> Click glowing tiles to move in L-shapes.</li>
+                        <li><strong>Conquer:</strong> Visit every square once to win.</li>
+                        <li><strong>Undo:</strong> You have 20 tactical timeline rewinds available.</li>
+                        <li><strong>Insight:</strong> Use Hint charms (10 total) for optimal structural guidance.</li>
                     </ol>
                 </div>
 
                 <div class="action-panel">
                     <button class="btn pause-btn-trigger" onclick="togglePause()">Pause</button>
-                    <button class="btn" id="undo-btn" onclick="undoLastMove()">↩Undo</button>
+                    <button class="btn" id="undo-btn" onclick="undoLastMove()">Undo</button>
+                    <button class="btn" id="hint-btn" onclick="revealHint()">Hint</button>
                     <button class="btn" id="reset-btn" onclick="resetGame()">Restart</button>
                     <button class="btn main-menu-btn" onclick="goToMainMenu()">Main Menu</button>
                 </div>
@@ -76,9 +107,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- LINK CLOUD CREDENTIALS HERE ---
-        const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
+        const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const BOARD_SIZE = 8;
@@ -89,13 +119,16 @@
         let secondsElapsed = 0;
         let gameActive = true;
         let isPaused = false;
-        let undosRemaining = 5;
+        
+        let undosRemaining = 20;
+        let hintsRemaining = 10;
 
         const containerElement = document.getElementById('game-container');
         const boardElement = document.getElementById('chess-board');
         const scoreElement = document.getElementById('score');
         const timerElement = document.getElementById('timer');
         const undoCounterElement = document.getElementById('undo-counter');
+        const hintCounterElement = document.getElementById('hint-counter');
         const statusElement = document.getElementById('status-msg');
         const pauseModal = document.getElementById('pause-modal');
         const gameoverModal = document.getElementById('gameover-modal');
@@ -169,7 +202,7 @@
             boardState[poppedMove.r][poppedMove.c] = false;
             
             const cellToClear = getCellElement(poppedMove.r, poppedMove.c);
-            cellToClear.classList.remove('current-pos', 'visited');
+            cellToClear.classList.remove('current-pos', 'visited', 'hint-target');
             cellToClear.innerText = '';
 
             currentPos = history[history.length - 1];
@@ -188,6 +221,51 @@
             updateHighlights();
         }
 
+        function revealHint() {
+            if (!gameActive || isPaused) return;
+            
+            if (currentPos === null) {
+                statusElement.innerText = "Place your starting piece first before calling for guidance!";
+                statusElement.style.color = "#ebd16e";
+                return;
+            }
+
+            if (hintsRemaining <= 0) {
+                statusElement.innerText = "Your hint charms are completely exhausted!";
+                statusElement.style.color = "#ff4565";
+                return;
+            }
+
+            // Wipe out older visual elements to prioritize the clean path lookup
+            document.querySelectorAll('.cell').forEach(el => el.classList.remove('hint-target'));
+
+            const validMoves = getValidMoves(currentPos.r, currentPos.c);
+            if (validMoves.length === 0) return;
+
+            // Warnsdorff's Mathematical Algorithm: Pick the target possessing the fewest future options
+            let bestMove = null;
+            let minFutureMoves = Infinity;
+
+            for (const move of validMoves) {
+                const nextOptionsCount = getValidMoves(move.r, move.c).length;
+                if (nextOptionsCount < minFutureMoves) {
+                    minFutureMoves = nextOptionsCount;
+                    bestMove = move;
+                }
+            }
+
+            if (bestMove) {
+                const hintCell = getCellElement(bestMove.r, bestMove.c);
+                hintCell.classList.add('hint-target');
+                
+                hintsRemaining--;
+                hintCounterElement.innerText = hintsRemaining;
+                
+                statusElement.innerText = "An optimal projection coordinate has been highlighted in gold.";
+                statusElement.style.color = "#ebd16e";
+            }
+        }
+
         function isValidLMove(r1, c1, r2, c2) {
             const rowDiff = Math.abs(r1 - r2);
             const colDiff = Math.abs(c1 - c2);
@@ -195,7 +273,7 @@
         }
 
         function updateHighlights() {
-            document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target'));
+            document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target', 'hint-target'));
             if (!gameActive || currentPos === null || isPaused) return;
 
             getValidMoves(currentPos.r, currentPos.c).forEach(move => {
@@ -223,7 +301,7 @@
                 pauseModal.classList.add('active');
                 statusElement.innerText = "Game Paused.";
                 statusElement.style.color = "#ebd16e";
-                document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target'));
+                document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target', 'hint-target'));
             } else {
                 pauseModal.classList.remove('active');
                 statusElement.innerText = "The path is clear. Keep jumping!";
@@ -237,7 +315,6 @@
 
         function goToMainMenu() {
             window.location.href = "./mainmenu.html";
-
         }
 
         function checkGameStates() {
@@ -295,8 +372,11 @@
             clearInterval(timerInterval);
             timerElement.innerText = "00:00";
             scoreElement.innerText = "0";
-            undosRemaining = 5;
-            undoCounterElement.innerText = undosRemaining;
+            
+            undosRemaining = 20;
+            hintsRemaining = 10;
+            undoCounterElement.innerText = "20";
+            hintCounterElement.innerText = "10";
             
             statusElement.innerText = "Click any tile to start your quest...";
             statusElement.style.color = "#00ffc8";
@@ -335,7 +415,6 @@
             }
         }
 
-        // Run instantiation routine on DOM entry execution
         initBoard();
     </script>
 </body>
