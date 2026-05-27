@@ -6,7 +6,26 @@
 <title>Checkmeowt Fantasy Menu</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=400;700&family=Poppins:wght=300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./indexstyle.css">
+<link rel="stylesheet" href="./mainmenustyle.css">
+
+<style>
+    /* Absolute fallback system to make sure modals show and hide cleanly */
+    .modal-overlay {
+        display: none !important; 
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .modal-overlay.active {
+        display: flex !important; 
+    }
+</style>
 </head>
 
 <body>
@@ -55,7 +74,7 @@
 
                     </div>
                     <div style="text-align: center; margin-top: 15px;">
-                        <button class="modal-close-btn" onclick="closeNewGame()" style="background-color: transparent; border: none; color: #726891; font-size: 13px; cursor: pointer; text-decoration: underline;">Cancel</button>
+                        <button type="button" class="modal-close-btn" onclick="closeNewGame()" style="background-color: transparent; border: none; color: #726891; font-size: 13px; cursor: pointer; text-decoration: underline;">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -89,7 +108,7 @@
                                 </tr>
                             </thead>
                             <tbody id="scoreboard-rows">
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                     <div style="text-align: center; margin-top: 20px;">
@@ -136,79 +155,143 @@
 <script src="localstorage.js"></script>
 
 <script>
-    // --- LINK YOUR CREDENTIALS HERE ---
-    const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iVIA"; 
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // --- SAFE DATABASE INITIALIZATION ---
+    const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A"; 
+    let _supabase = null;
 
-    function openRules() {
-        document.getElementById("rules-modal").classList.add("active");
+    try {
+        if (typeof supabase !== 'undefined') {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch(err) {
+        console.warn("Supabase failed to load:", err);
     }
 
-    function closeRules() {
-        document.getElementById("rules-modal").classList.remove("active");
-    }
-
+    // --- NEW GAME MODAL FUNCTIONS ---
     function openNewGame() {
-        document.getElementById("new-game-modal").classList.add("active");
+        const modal = document.getElementById("new-game-modal");
+        if (modal) {
+            modal.style.setProperty("display", "flex", "important");
+            modal.classList.add("active");
+        }
     }
 
     function closeNewGame() {
-        document.getElementById("new-game-modal").classList.remove("active");
+        const modal = document.getElementById("new-game-modal");
+        if (modal) {
+            modal.style.setProperty("display", "none", "important");
+            modal.classList.remove("active");
+        }
     }
 
-    // --- DOWNLOAD SCORES DYNAMICALLY FROM SUPABASE ---
+    // --- RULES MODAL FUNCTIONS ---
+    function openRules() {
+        const modal = document.getElementById("rules-modal");
+        if (modal) {
+            modal.style.setProperty("display", "flex", "important");
+            modal.classList.add("active");
+        }
+    }
+
+    function closeRules() {
+        const modal = document.getElementById("rules-modal");
+        if (modal) {
+            modal.style.setProperty("display", "none", "important");
+            modal.classList.remove("active");
+        }
+    }
+
+    // --- CONTINUE GAME UTILITIES ---
+    function checkSaveGame() {
+        try {
+            let hasSavedProgress = localStorage.getItem("knightsTourSave");
+            if (!hasSavedProgress) {
+                const modal = document.getElementById("no-save-modal");
+                if (modal) {
+                    modal.style.setProperty("display", "flex", "important");
+                    modal.classList.add("active");
+                }
+            } else {
+                let savedMode = localStorage.getItem("knightsTourSavedMode") || "competitor"; 
+                window.location.href = `${savedMode}.html?load=true`;
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    function closeModal() {
+        const modal = document.getElementById("no-save-modal");
+        if (modal) {
+            modal.style.setProperty("display", "none", "important");
+            modal.classList.remove("active");
+        }
+    }
+
+    // --- HISTORIC SCOREBOARD FROM CLOUD ---
     async function openScoreboard() {
-        document.getElementById("scoreboard-modal").classList.add("active");
+        const modal = document.getElementById("scoreboard-modal");
+        if (modal) {
+            modal.style.setProperty("display", "flex", "important");
+            modal.classList.add("active");
+        }
         
         const tableBody = document.getElementById("scoreboard-rows");
+        if (!tableBody) return;
+        
         tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; color:#a296c4;">Fetching cloud data...</td></tr>`;
 
-        // Fetch records sorted by highest tiles cleared first
-        const { data: scores, error } = await _supabase
-            .from('scoreboard')
-            .select('*')
-            .order('tiles_cleared', { ascending: false });
-
-        if (error) {
-            console.error(error);
-            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; padding:15px;">Failed to load cloud scores.</td></tr>`;
+        if (!_supabase) {
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#726891; padding:15px;">Database offline. Can't retrieve scores.</td></tr>`;
             return;
         }
 
-        tableBody.innerHTML = ""; // Clear loader text
+        try {
+            const { data: scores, error } = await _supabase
+                .from('scoreboard')
+                .select('*')
+                .order('tiles_cleared', { ascending: false });
 
-        if (scores.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; color:#726891;">No historic records found.</td></tr>`;
-            return;
+            if (error) throw error;
+
+            tableBody.innerHTML = ""; 
+
+            if (!scores || scores.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; color:#726891;">No historic records found.</td></tr>`;
+                return;
+            }
+
+            scores.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.style.borderBottom = "1px solid rgba(108, 59, 245, 0.2)";
+                tr.innerHTML = `
+                    <td style="padding: 10px 8px; font-weight: 600; color: #d9b3ff;">${row.mode} <span style="font-size:11px; color:#8c7db3;">(${row.username || 'Guest'})</span></td>
+                    <td style="padding: 10px 8px; text-align: center;">${row.tiles_cleared}</td>
+                    <td style="padding: 10px 8px; text-align: right;">${row.time}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        } catch(err) {
+            console.error("Scoreboard render exception:", err);
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#ff6b6b; padding:15px;">Failed to load cloud scores.</td></tr>`;
         }
-
-        scores.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.style.borderBottom = "1px solid rgba(108, 59, 245, 0.2)";
-            tr.innerHTML = `
-                <td style="padding: 10px 8px; font-weight: 600; color: #d9b3ff;">${row.mode} <span style="font-size:11px; color:#8c7db3;">(${row.username})</span></td>
-                <td style="padding: 10px 8px; text-align: center;">${row.tiles_cleared}</td>
-                <td style="padding: 10px 8px; text-align: right;">${row.time}</td>
-            `;
-            tableBody.appendChild(tr);
-        });
     }
 
     function closeScoreboard() {
-        document.getElementById("scoreboard-modal").classList.remove("active");
+        const modal = document.getElementById("scoreboard-modal");
+        if (modal) {
+            modal.style.setProperty("display", "none", "important");
+            modal.classList.remove("active");
+        }
     }
 
-    // --- SAFETY-OPTIMIZED EXIT SYSTEM CONTROLLER ---
+    // --- EXIT APP ---
     function exitGame() {
         try {
             localStorage.removeItem("currentUser");
-        } catch(e) {
-            console.log("LocalStorage tracking bypass.");
-        }
-        
-        // Clear routing back to login workspace page
-        window.location.href = "./loginpage.html";
+        } catch(e) {}
+        window.location.href = "./indexloginpage.html";
     }
 </script>
 

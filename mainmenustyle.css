@@ -85,7 +85,8 @@ body::before{
     gap:20px;
 }
 
-.menu button{
+/* FIX: Changed selector to apply ONLY to direct main menu choices */
+.menu > button{
     background:rgba(20,0,35,0.8);
     border:2px solid #8c2bff;
     color:white;
@@ -97,9 +98,10 @@ body::before{
     transition:0.3s;
     letter-spacing:2px;
     box-shadow:0 0 10px rgba(128,0,255,0.3);
+    width: 100%;
 }
 
-.menu button:hover{
+.menu > button:hover{
     transform:translateX(10px);
     background:#8c2bff;
     box-shadow:
@@ -186,19 +188,15 @@ body::before{
     width: 100vw;
     height: 100vh;
     background: rgba(3, 1, 7, 0.85); /* Dims the background menu */
-    display: flex;
+    display: none; /* Changed from opacity to clean display toggling */
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
 }
 
 /* Class added via JS to show popup smoothly */
 .modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
+    display: flex !important;
 }
 
 .modal-card {
@@ -231,7 +229,7 @@ body::before{
 }
 
 .modal-title i {
-    color: #ebd16e; /* Warning color tint */
+    color: #ebd16e; 
 }
 
 .modal-text {
@@ -241,21 +239,25 @@ body::before{
     margin-bottom: 25px;
 }
 
-.modal-close-btn {
-    background-color: #6c3bf5;
-    color: #ffffff;
-    font-family: 'Cinzel', serif;
-    font-weight: 600;
-    letter-spacing: 1px;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 0 10px rgba(108, 59, 245, 0.3);
+/* Explicit scoping to prevent layout inheritances */
+.modal-close-btn, .modal-card button {
+    background-color: #6c3bf5 !important;
+    color: #ffffff !important;
+    font-family: 'Cinzel', serif !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    letter-spacing: 1px !important;
+    border: none !important;
+    padding: 10px 30px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 0 10px rgba(108, 59, 245, 0.3) !important;
+    transform: none !important;
 }
 
-.modal-close-btn:hover {
-    background-color: #8257ff;
-    box-shadow: 0 0 15px rgba(130, 87, 255, 0.6);
+.modal-close-btn:hover, .modal-card button:hover {
+    background-color: #8257ff !important;
+    box-shadow: 0 0 15px rgba(130, 87, 255, 0.6) !important;
+    transform: none !important;
 }

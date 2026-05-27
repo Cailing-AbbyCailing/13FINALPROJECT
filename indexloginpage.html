@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkmeowt Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=400;700&family=Poppins:wght=300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./loginstyle.css">
+<link rel="stylesheet" href="./indexloginstyle.css">
 </head>
 <body>
 
@@ -128,7 +128,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
             closeRegisterModal();
             
             // Move player to the main screen layout automatically
-            window.location.href = "./index.html";
+            window.location.href = "./mainmenu.html";
         }
     }
 
@@ -157,7 +157,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
         if (validUser) {
             // Keep track of who is logged in locally during this game run
             localStorage.setItem("currentUser", validUser.username);
-            window.location.href = "./index.html";
+            window.location.href = "./mainmenu.html";
         } else {
             alert("Authentication Failure: Invalid credentials.");
         }
