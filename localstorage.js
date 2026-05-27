@@ -5,7 +5,7 @@ const SUPABASE_URL = "https://cmjhlvtolmbjumyffls.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_4DRlv_pUAl9upLZjjdJoGA_0IW2iV1A";
 let _supabase = null;
 
-// Safely initialize the client without breaking the script if Supabase is missing
+
 try {
     if (typeof supabase !== 'undefined') {
         _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -20,10 +20,6 @@ try {
 // 2. MAIN MENU FUNCTIONALITIES
 // ==========================================
 
-/**
- * NEW GAME FUNCTION
- * Opens the New Game / Difficulty selection modal
- */
 function openNewGame() {
     console.log("New Game clicked");
     const modal = document.getElementById("new-game-modal") || document.getElementById("new game modal") || document.getElementById("new_game_modal");
@@ -35,9 +31,6 @@ function openNewGame() {
     }
 }
 
-/**
- * FIXED: CANCEL / CLOSE NEW GAME FUNCTION
- */
 function closeNewGame() {
     console.log("Cancel New Game clicked");
     const modal = document.getElementById("new-game-modal") || document.getElementById("new game modal") || document.getElementById("new_game_modal");
@@ -47,9 +40,6 @@ function closeNewGame() {
     }
 }
 
-/**
- * FIXED FUNCTION NAME: MATCHES HTML onclick="openScoreboard()"
- */
 function openScoreboard() {
     console.log("History clicked");
     const modal = document.getElementById("scoreboard-modal") || document.getElementById("history-modal") || document.getElementById("history_modal");
@@ -57,7 +47,6 @@ function openScoreboard() {
         modal.style.setProperty("display", "flex", "important");
         modal.classList.add("active");
         
-        // Render simple fallback rows if scoreboard dynamic table isn't present
         const tableBody = document.getElementById("scoreboard-rows");
         if (tableBody && tableBody.innerHTML.trim() === "") {
             tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; color:#726891;">Loading records...</td></tr>`;
@@ -67,9 +56,6 @@ function openScoreboard() {
     }
 }
 
-/**
- * FIXED: CLOSE SCOREBOARD FUNCTION
- */
 function closeScoreboard() {
     const modal = document.getElementById("scoreboard-modal") || document.getElementById("history-modal") || document.getElementById("history_modal");
     if (modal) {
@@ -78,9 +64,7 @@ function closeScoreboard() {
     }
 }
 
-/**
- * FIXED FUNCTION NAME: MATCHES HTML onclick="openRules()"
- */
+
 function openRules() {
     console.log("Rules clicked");
     const modal = document.getElementById("rules-modal") || document.getElementById("rules_modal");
@@ -92,9 +76,6 @@ function openRules() {
     }
 }
 
-/**
- * FIXED: CLOSE RULES FUNCTION
- */
 function closeRules() {
     const modal = document.getElementById("rules-modal") || document.getElementById("rules_modal");
     if (modal) {
@@ -103,13 +84,10 @@ function closeRules() {
     }
 }
 
-/**
- * EXIT FUNCTION
- */
 function exitGame() {
     console.log("Exit clicked");
     if (confirm("Are you sure you want to exit to the login page?")) {
-        window.location.href = "indexloginpage.html";
+        window.location.href = "index.html";
     }
 }
 
@@ -139,7 +117,6 @@ function checkSaveGame() {
 }
 
 function closeModal() {
-    // Closes all overlays
     const modals = document.querySelectorAll('.modal-overlay, #no-save-modal, #new-game-modal, #scoreboard-modal, #history-modal, #rules-modal');
     modals.forEach(modal => {
         modal.style.setProperty("display", "none", "important");

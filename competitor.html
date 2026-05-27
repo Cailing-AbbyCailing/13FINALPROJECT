@@ -110,6 +110,7 @@
         const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("Supabase initialized");
 
         const BOARD_SIZE = 8;
         let boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(false));
@@ -236,13 +237,11 @@
                 return;
             }
 
-            // Wipe out older visual elements to prioritize the clean path lookup
             document.querySelectorAll('.cell').forEach(el => el.classList.remove('hint-target'));
 
             const validMoves = getValidMoves(currentPos.r, currentPos.c);
             if (validMoves.length === 0) return;
 
-            // Warnsdorff's Mathematical Algorithm: Pick the target possessing the fewest future options
             let bestMove = null;
             let minFutureMoves = Infinity;
 

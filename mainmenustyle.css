@@ -337,6 +337,19 @@ body::before{
     color: #ff9999;
 }
 
+/* Specific hover override for the Grandmaster mode button */
+.mode-link.expert-btn:hover {
+    background: rgba(255, 0, 0, 0.15);
+    border-color: #ff0000;
+}
+
+.mode-link.expert-btn:hover .bold-text {
+    color: #ff4d4d;
+}
+
+.mode-link.expert-btn:hover .desc-text {
+    color: #ff9999;
+}
 
 /* Specific layout properties for the Rules Modal text alignment */
 .rules-card-wide {

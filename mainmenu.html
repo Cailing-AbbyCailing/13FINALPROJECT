@@ -43,7 +43,7 @@
                             <div class="desc-text">Valid moves highlighted, 10 undo allowed, no hints</div>
                         </a>
 
-                        <a href="grandmaster.html" class="mode-link grandmaster-btn">
+                        <a href="./grandmaster.html" class="mode-link grandmaster-btn">
                             <div class="bold-text">GRANDMASTER</div>
                             <div class="desc-text">Valid moves not highlights, no undo, no hints</div>
                         </a>
@@ -190,7 +190,7 @@
                 else if (index === 1) rankColor = "#c0c0c0";
                 else if (index === 2) rankColor = "#cd7f32";
 
-                // Standardizes dynamic string data coming from your Supabase 'mode' column
+                
                 let displayMode = "Competitor"; 
                 if (row.mode) {
                     displayMode = row.mode.charAt(0).toUpperCase() + row.mode.slice(1).toLowerCase();
@@ -238,7 +238,7 @@
     // =========================
     function exitGame() {
         localStorage.removeItem("currentUser");
-        window.location.href = "./indexloginpage.html";
+        window.location.href = "./index.html";
     }
 </script>
 

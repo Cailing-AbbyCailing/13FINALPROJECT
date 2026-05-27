@@ -73,10 +73,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- LINK YOUR CREDENTIALS HERE ---
-        const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik"; 
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log("Supabase initialized");
 
         const BOARD_SIZE = 8;
         let boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(false));
@@ -199,7 +199,7 @@
                 gameActive = false;
                 updateHighlights();
                 
-                // TRIGGER CLOUD STORAGE ON EXPERT PERFECT RUN
+         
                 uploadGameScore("Expert", history.length, timerElement.innerText);
                 return;
             }
@@ -213,7 +213,7 @@
                 
                 triggerDefeatSequence();
 
-                // TRIGGER CLOUD STORAGE ON EXPERT TRAPPED FAILURE
+               
                 uploadGameScore("Expert", history.length, timerElement.innerText);
             } else {
                 statusElement.innerText = "The path is clear. Keep jumping!";

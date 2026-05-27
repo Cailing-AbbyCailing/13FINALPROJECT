@@ -22,7 +22,6 @@ h1, h2, h3 {
     margin-bottom: 20px;
 }
 
-/* Container matching the neon fantasy aura look */
 .container {
     max-width: 1100px;
     width: 100%;
@@ -34,7 +33,6 @@ h1, h2, h3 {
     box-sizing: border-box;
 }
 
-/* --- THE MAIN FLEXBOARD SPLIT WRAPPER --- */
 .split-screen-layout {
     display: flex;
     flex-direction: row;
@@ -44,7 +42,6 @@ h1, h2, h3 {
     width: 100%;
 }
 
-/* LEFT COLUMN: Controls, Rules, and Panel stacked cleanly */
 .left-panel {
     flex: 1;
     display: flex;
@@ -53,7 +50,7 @@ h1, h2, h3 {
     max-width: 440px;
 }
 
-/* RIGHT COLUMN: Board and Status Response alignment */
+
 .right-panel {
     flex: 1.2;
     display: flex;
@@ -61,7 +58,6 @@ h1, h2, h3 {
     align-items: center;
 }
 
-/* --- LEFT SIDE DATA MODULES --- */
 .game-controls {
     display: flex;
     justify-content: space-around;
@@ -121,7 +117,6 @@ strong {
     text-shadow: 0 0 5px rgba(186, 85, 211, 0.5);
 }
 
-/* --- ACTION PANEL (PLACED BELOW HOW TO PLAY) --- */
 .action-panel {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -150,7 +145,6 @@ strong {
     color: #0d0214;
 }
 
-/* Pause button customized look */
 .pause-btn-trigger {
     border-color: #ebd16e !important;
     color: #ebd16e !important;
@@ -162,7 +156,6 @@ strong {
     box-shadow: 0 0 12px #ebd16e !important;
 }
 
-/* --- RIGHT SIDE ENGINE GRAPHICS --- */
 .board-wrapper {
     display: flex;
     justify-content: center;
@@ -226,7 +219,6 @@ strong {
     margin-top: 5px;
 }
 
-/* --- OVERLAY PAUSE CONTROLS STYLE SHEETS --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -327,7 +319,6 @@ strong {
     100% { filter: brightness(1.4); }
 }
 
-/* High Resolution Responsive Adjustment */
 @media (max-width: 950px) {
     .split-screen-layout {
         flex-direction: column;
@@ -353,9 +344,8 @@ strong {
     40%, 60% { transform: translate3d(6px, -4px, 0); }
 }
 
-/* --- DEFEAT / GAME OVER OVERLAY MODAL SYSTEM --- */
 .modal-overlay.gameover-theme {
-    background: rgba(40, 2, 10, 0.7); /* Red transparent tint backdrop filter */
+    background: rgba(40, 2, 10, 0.7); 
     border: none;
     box-shadow: inset 0 0 100px rgba(255, 0, 50, 0.3);
 }
@@ -377,7 +367,6 @@ strong {
     color: #ffb0b5;
 }
 
-/* Retry custom visual state action rules */
 .modal-btn.retry-btn {
     background: #ff3344;
     border: 1px solid #ff3344;

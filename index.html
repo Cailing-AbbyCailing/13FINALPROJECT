@@ -68,13 +68,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-    // Define the configuration explicitly
+
     const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
-    
-    // CRITICAL: Ensure this is your actual long 'anon' 'public' key starting with eyJ...
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik"; 
 
-    // Explicitly use window.supabase to guarantee the library is targeted correctly
     if (typeof window.supabase === 'undefined') {
         alert("Critical Error: Supabase CDN failed to load. Check your internet connection.");
     }
@@ -92,7 +89,7 @@
 
     // --- CLOUD REGISTRATION ENGINE ---
     async function handleRegister(event) {
-        event.preventDefault(); // Stop form submission page-reload
+        event.preventDefault(); 
 
         const username = document.getElementById("reg-username").value.trim();
         const email = document.getElementById("reg-email").value.trim();
@@ -105,7 +102,7 @@
         }
 
         try {
-            // Fetch users cleanly without complex query filtering that breaks local strings
+          
             const { data: existingUsers, error: fetchError } = await _supabase
                 .from('checkmeowt_users')
                 .select('*');
@@ -125,7 +122,7 @@
                 return;
             }
 
-            // Insert new account record
+            
             const { error: insertError } = await _supabase
                 .from('checkmeowt_users')
                 .insert([{ username: username, email: email, password: password }]);

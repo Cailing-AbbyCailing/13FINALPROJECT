@@ -97,6 +97,7 @@
         const SUPABASE_URL = "https://cmjhlvtolymbjumyffls.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtamhsdnRvbHltYmp1bXlmZmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjA1NDksImV4cCI6MjA5NTM5NjU0OX0.sd6oeyW0TcDIapW9PJ_hPjBRZjWAd4DrK0wcYnBvfik";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("Supabase initialized");
 
         const BOARD_SIZE = 8;
         let boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(false));
@@ -181,14 +182,13 @@
                 return;
             }
 
-            // Pop current position out of existence
+         
             const undonePos = history.pop();
             boardState[undonePos.r][undonePos.c] = false;
             const undoneCell = getCellElement(undonePos.r, undonePos.c);
             undoneCell.classList.remove('current-pos');
             undoneCell.innerText = '';
 
-            // Roll backward step references
             currentPos = history[history.length - 1];
             const activeCell = getCellElement(currentPos.r, currentPos.c);
             activeCell.classList.remove('visited');
@@ -212,12 +212,10 @@
         }
 
         function updateHighlights() {
-            // First wipe all legacy layouts cleanly
             document.querySelectorAll('.cell').forEach(el => el.classList.remove('valid-target'));
             
             if (!gameActive || isPaused || currentPos === null) return;
 
-            // Highlight new projection coordinates onto the arena tiles
             const targets = getValidMoves(currentPos.r, currentPos.c);
             targets.forEach(m => {
                 const targetCell = getCellElement(m.r, m.c);
